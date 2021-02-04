@@ -1,5 +1,7 @@
 /** @type {Socket} */
-const io = require('socket.io')();
+const io = require('socket.io')({
+    origins: ['https://seven-squares-studios.itch.io']
+});
 
 let players = {};
 
