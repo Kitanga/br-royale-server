@@ -7,14 +7,18 @@ io.on('connection', client => {
     console.log('Client connected at', (new Date()).toTimeString());
 
     client.on('init', data => {
-        // console.log('Init event:', data);
         // First get a list of all players
-        const playerList = [];
+        const playerList = {};
 
         for (let key in players) {
             if (players.hasOwnProperty(key)) {
                 if (players[key]) {
-                    playerList.push(players[key]);
+                    playerList[key] = {
+                        id: players[key].id,
+                        x: players[key].x,
+                        y: players[key].y,
+                        r: players[key].r,
+                    };
                 }
             }
         }
@@ -26,21 +30,24 @@ io.on('connection', client => {
             ...data
         };
 
-        players[newPlayer.id] = newPlayer;
-
         client.broadcast.emit('new-player', newPlayer);
-
+        
         client.emit('players', playerList);
+        console.log('Players:', playerList);
+        
+        players[newPlayer.id] = newPlayer;
     });
 
     client.on('update', data => {
         // console.log('Update event:', data);
         try {
-            players[client.id].x = data.x ?? players[client.id].x;
-            players[client.id].y = data.y ?? players[client.id].y;
-            players[client.id].r = data.r ?? players[client.id].r;
+            const player = players[data.id];
+            
+            player.x = data.x ?? player.x;
+            player.y = data.y ?? player.y;
+            player.r = data.r ?? player.r;
             client.broadcast.emit('update', {
-                id: client.id,
+                id: data.id,
                 ...data
             });
         } catch {
@@ -61,7 +68,7 @@ io.on('connection', client => {
     client.on('disconnecting', () => {
         // console.log('Disconnecting event', client);
         players[client.id] = null;
-        client.broadcast.emit('disconnected', client.id);
+        client.broadcast.emit('remove-player', client.id);
     });
 });
 
