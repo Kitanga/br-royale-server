@@ -3,6 +3,10 @@ const io = require('socket.io')({
     origins: ['https://seven-squares-studios.itch.io']
 });
 
+try {
+    console.log('AWS:', AWS);
+} catch {}
+
 let players = {};
 
 io.on('connection', client => {
